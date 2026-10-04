@@ -40,7 +40,7 @@ The node outputs the saved image (or the input image when `enabled` is off), so 
 
    ```
    cd <invokeai root>/nodes
-   git clone https://github.com/<you>/invokeai-conditional-save-board
+   git clone https://github.com/unmarco/invokeai-conditional-save-board
    ```
 
 2. Restart InvokeAI and hard-reload the browser page.
