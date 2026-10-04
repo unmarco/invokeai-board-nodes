@@ -1,38 +1,42 @@
-# Save to Board (Conditional) — InvokeAI custom node
+# Save to Board (Conditional)
 
-An [InvokeAI](https://github.com/invoke-ai/InvokeAI) node that saves a copy of an image to a board **chosen by name while the workflow runs**, or skips saving entirely.
+A custom node for [InvokeAI](https://github.com/invoke-ai/InvokeAI) that saves an image to a board whose **name is decided while the workflow runs**, and can switch saving on or off.
 
-The board picker on InvokeAI's built-in save nodes is fixed before the run. This node takes the board name (and an on/off switch) as ordinary inputs, so both can come from the graph:
+## Why
 
-- A session name typed into a text field, joined with `-lo` and `-hi`, saves the original generation to `toyrobot-lo` and the optional upscale to `toyrobot-hi`. Neither board has to exist beforehand.
-- A LoRA name coming from a randomizer node is used as the board name, so every LoRA's results end up in their own board.
-- A Boolean switches a branch of the workflow on or off (say, "also save the upscale").
+InvokeAI's built-in save nodes use a board picker, which is fixed before you press Invoke. That is fine until the destination depends on something the workflow itself produces or receives. With this node, the board name and an on/off switch are ordinary inputs, so they can be connected to other nodes.
 
-## Inputs
+Some things that become possible:
+
+- **One workflow, many sessions.** Type a name such as `toyrobot` into a text field and join it with `-lo` and `-hi`. The original image is saved to `toyrobot-lo`, the optional upscale to `toyrobot-hi`. The boards are created the first time they are needed.
+- **Grouping by a value from the graph.** A randomizer node picks a LoRA, and its name becomes the board name, so each LoRA's results are collected in their own board.
+- **Optional branches.** Connect a Boolean to `enabled` so an extra step, for example the upscale, is saved only when you want it.
+
+## Using it
+
+Add **Save to Board (Conditional)** (category `image`) and connect an image. Then:
 
 | Input | What it does |
 | --- | --- |
-| `image` | The image to save a copy of. |
-| `enabled` | When off, nothing is saved and the image is passed through unchanged. Can be connected to a Boolean. |
-| `board_name` | The board to save to. Can be connected. Leave empty to use the board picker below, as on other save nodes (Uncategorized if unset). |
-| `create_if_missing` | Create the board if it doesn't exist (default on). When off, a missing board is an error. |
+| `image` | The image to save. A copy is saved; the original is untouched. |
+| `board_name` | The board to save to. Connect it to build the name in the graph, or type it. If it is empty, the board picker below is used, as on other save nodes (Uncategorized if unset). |
+| `create_if_missing` | On by default: a board that doesn't exist yet is created. Turn it off to make a missing board an error instead. |
+| `enabled` | On by default. When off, nothing is saved and the image is passed on unchanged. |
 | board picker | Used only when `board_name` is empty. |
-| metadata | If none is connected, the copy keeps the input image's own metadata. |
+| metadata | If none is connected, the saved copy keeps the input image's own metadata. |
 
-The output is the saved image (or the input image when disabled), so the node can sit in the middle of a graph.
+The node outputs the saved image (or the input image when `enabled` is off), so you can put it in the middle of a graph and keep going.
 
-## How names are matched
+## How the board name is matched
 
-- Leading and trailing whitespace is ignored; otherwise the name must match **exactly** (case-sensitive).
-- Only **your own** boards are considered: other users' shared or public boards never match.
-- Archived boards are ignored.
-- If **more than one** board has the name, the node fails and says so. Rename or archive all but one.
-
-These are the rules of InvokeAI's `context.boards.resolve`, which this node uses when your InvokeAI has it, and follows itself when it doesn't.
+- Spaces at the start and end are ignored. Otherwise the name must be exactly the same, including upper and lower case: `Toyrobot` and `toyrobot` are different boards.
+- Only your own boards are considered, not boards that other users have shared with you.
+- Archived boards are ignored, so archiving a board means "done with this name".
+- If two or more of your boards have that name, the node stops with an error that says so. Rename or archive all but one.
 
 ## Install
 
-1. Clone this repository into the `nodes` folder of your InvokeAI root (the folder that also holds `invokeai.yaml`):
+1. Clone this repository into the `nodes` folder of your InvokeAI root (the folder that holds `invokeai.yaml`):
 
    ```
    cd <invokeai root>/nodes
@@ -40,26 +44,28 @@ These are the rules of InvokeAI's `context.boards.resolve`, which this node uses
    ```
 
 2. Restart InvokeAI and hard-reload the browser page.
-3. Open or build a workflow. The node is called **Save to Board (Conditional)** (category `image`).
+3. Add the node in the workflow editor.
 
-Workflows saved while the node wasn't installed lose their connections to it; install first, then open them.
+Install the node before opening workflows that use it. A workflow opened without it loses its connections to the missing node, and saving it keeps them lost.
 
 ## Compatibility
 
-Developed and used on InvokeAI 6.14.x. On versions that have `context.boards.resolve` the node calls it; on older ones it finds and creates the board itself, with the same rules. Two things to know there:
+Developed and used on InvokeAI 6.14.x. Newer versions of InvokeAI may provide `context.boards.resolve`, which finds or creates a board by name for custom nodes. If it is there, the node uses it. If not, the node does the same thing itself, with the same rules as above.
 
-- `context.boards.get_all()` had a bug for some versions (invoke-ai/InvokeAI#9652, fixed in #9653), which the node works around.
-- Boards created while a workflow runs may not appear in the board list until the page is reloaded.
+On older versions, two things to know:
+
+- Boards created while a workflow runs may not show up in the board list until you reload the page.
+- InvokeAI's `context.boards.get_all()` had a bug in some versions ([#9652](https://github.com/invoke-ai/InvokeAI/issues/9652), fixed in [#9653](https://github.com/invoke-ai/InvokeAI/pull/9653)). The node works around it.
 
 ## Tests
 
-The tests only need InvokeAI importable; run them with the Python environment of an InvokeAI install:
+The tests need InvokeAI importable, so run them with the Python environment of an InvokeAI install:
 
 ```
 python -m pytest tests
 ```
 
-They cover both code paths, with and without `context.boards.resolve`.
+They cover both ways the node finds boards: with and without `context.boards.resolve`.
 
 ## License
 
