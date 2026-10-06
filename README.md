@@ -19,11 +19,7 @@ Some things that become possible:
 
 Both nodes are in the `image` category. A typical chain:
 
-```
-String (session name) ─► Join "-hi" ─► Board by Name ─► Save to Board (Conditional) ◄─ upscaled image
-                                                                  ▲
-                                                 Boolean "upscale?" (Save Enabled)
-```
+<img width="4584" height="2322" alt="board-nodes-demo" src="https://github.com/user-attachments/assets/65bce4f6-adef-4531-8756-958b8627a207" />
 
 ### Board by Name
 
