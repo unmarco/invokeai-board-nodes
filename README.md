@@ -69,7 +69,7 @@ Version 1.x had a single node, Save to Board (Conditional), with `board_name` an
 
 ## Compatibility
 
-Developed on InvokeAI 6.14.x and tested on 7.0.0-alpha.
+Developed on InvokeAI 6.14.x and tested on 7.0.0-alpha.1 and 7.0.0-alpha.2.
 
 A board-by-name lookup for nodes, `context.boards.resolve`, is proposed for InvokeAI itself (prototype on the [`feat/boards-resolve-by-name`](https://github.com/unmarco/InvokeAI/tree/feat/boards-resolve-by-name) branch of my fork). When InvokeAI provides it, Board by Name calls it. Otherwise it does the same thing itself, with the same rules as above.
 
