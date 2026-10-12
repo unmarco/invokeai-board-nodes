@@ -1,5 +1,10 @@
 from invokeai.app.services.board_records.board_records_common import BoardRecordOrderBy
-from invokeai.app.services.shared.sqlite.sqlite_common import SQLiteDirection
+
+try:
+    from invokeai.app.services.shared.pagination import SQLiteDirection  # 7.0.0-alpha.2+
+except ImportError:
+    from invokeai.app.services.shared.sqlite.sqlite_common import SQLiteDirection
+
 from invokeai.invocation_api import (
     BaseInvocation,
     BaseInvocationOutput,
